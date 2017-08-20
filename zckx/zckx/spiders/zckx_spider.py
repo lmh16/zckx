@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import scrapy
 import time
 
@@ -18,7 +19,7 @@ class ZckxSpider(scrapy.Spider):
         #if response.xpath('//*[@id="post-date"]').extract() != [time.strftime("%Y-%m-%d", time.localtime())]:
         if response.xpath('//*[@id="post-date"]/text()').extract() == ["2017-08-19"]:
             
-            item['title'] = response.xpath('//title/text()')
+            item['title'] = response.xpath('//title/text()').extract()
             
             item['content'] = []
             for line in response.xpath('//p/text()|//img'):
@@ -29,9 +30,25 @@ class ZckxSpider(scrapy.Spider):
                 if(line.split()!=[]):
                     item['content'].append(line)
                 
-        yield item
+            yield item
         
-        #format into html
-        #post=""
+            #format into html
+            pic_count=0;
+            if not u"\u3010\u5a01\u5a01\u5feb\u8baf\u3011" in item['title'][0]:
+                return
+            file_html = open(str(hash(item['title'][0]))+'.txt','w')
+            for line in item['content']:
+                if "!important" in line:
+                    break
+                if "src" in line:
+                    if "http" in line:
+                        pic_count+=1
+                        file_html.write(("<p><img src=\"cid:image"+str(pic_count)+"\"></p>\n"))
+                        #save the pic
+                else:
+                    file_html.write(("<p>"+line+"</p>\n").encode('utf-8'))
+                    
+                
+            file_html.close()
         
         
