@@ -51,20 +51,25 @@ class ZckxSpider(scrapy.Spider):
             
             os.mkdir('posts/'+str(hash(item['title'][0])))
             os.chdir('posts/'+str(hash(item['title'][0])))
-            file_html = open('content.txt','w')
+            
+            file_html = open('title.txt','w')
             file_html.write(item['title'][0][6:]+'\n')
+            file_html.close()
+            
+            file_html = open('content.txt','w')
             
             for line in item['content']:
                 if "!important" in line:
                     break
                 if "src" in line:
-                    if "http" in line:
-                        pic_count+=1
-                        file_html.write(("<section><img src=\"cid:image"+str(pic_count)+"\"></section>\n"))
-                        #save the pic
-                        imgurl=re.findall(imgre,line)
-                        urllib.urlretrieve(imgurl[0][0],'%s.' % pic_count+imgurl[0][1])
-                        #TODO: delete unrelated pictures
+                    if not "http" in line:
+                        continue
+                    pic_count+=1
+                    file_html.write(("<section><img src=\"cid:image"+str(pic_count)+"\"></section>\n"))
+                    #save the pic
+                    imgurl=re.findall(imgre,line)
+                    urllib.urlretrieve(imgurl[0][0],'%s.' % pic_count+imgurl[0][1])
+                    #TODO: delete unrelated pictures
                         
                 else:
                     file_html.write(("<section>"+line+"</section>\n").encode('utf-8'))
