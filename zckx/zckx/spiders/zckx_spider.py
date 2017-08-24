@@ -18,8 +18,9 @@ class ZckxSpider(scrapy.Spider):
         item = ZckxItem()
         
         #check if item is posted today
-        #if response.xpath('//*[@id="post-date"]/text()').extract() == [time.strftime("%Y-%m-%d", time.localtime())]:
-        if response.xpath('//*[@id="post-date"]/text()').extract() == ["2017-08-20"]:
+        #datestr=time.strftime("%Y-%m-%d", time.localtime())
+        datestr="2017-08-23"
+        if response.xpath('//*[@id="post-date"]/text()').extract() == [datestr]:
             item['title'] = response.xpath('//title/text()').extract()
             
             text_linecount=0
@@ -45,12 +46,12 @@ class ZckxSpider(scrapy.Spider):
             #format into html
             pic_count=0;
             #check if the post belongs to zckx
-            if not item['title'][0][0:6] == u"\u3010\u5a01\u5a01\u5feb\u8baf\u3011":
+            if (not item['title'][0][0:6] == u"\u3010\u5a01\u5a01\u5feb\u8baf\u3011") and (not item['title'][0][0:6] == u"\u3010\u5a01\u5a01\u7b80\u8baf\u3011"):
                 return
             
             
-            os.mkdir('posts/'+str(hash(item['title'][0])))
-            os.chdir('posts/'+str(hash(item['title'][0])))
+            os.mkdir('D:/zckx/zckx/posts/'+str(hash(item['title'][0])))
+            os.chdir('D:/zckx/zckx/posts/'+str(hash(item['title'][0])))
             
             file_html = open('title.txt','w')
             file_html.write(item['title'][0][6:]+'\n')
@@ -65,10 +66,13 @@ class ZckxSpider(scrapy.Spider):
                     if not "http" in line:
                         continue
                     pic_count+=1
-                    file_html.write(("<section><img src=\"cid:image"+str(pic_count)+"\"></section>\n"))
+                    
                     #save the pic
                     imgurl=re.findall(imgre,line)
-                    urllib.urlretrieve(imgurl[0][0],'%s.' % pic_count+imgurl[0][1])
+                    urllib.urlretrieve(imgurl[0][0],datestr[8:10]+'%s.' % pic_count+imgurl[0][1])
+                    
+                    file_html.write(("<section><img src=\"http://junxun.sjtu.edu.cn/uploads/2017/08/"+datestr[8:10]+str(pic_count)+'.'+imgurl[0][1]+"\"></section>\n"))
+                    
                     #TODO: delete unrelated pictures
                         
                 else:
